@@ -46,31 +46,31 @@ void Malha::gerarMalha(string txt)
             v4->definirVertice(x, y, magn, cont+4);
 
             cont = cont + 4;
-            
-			//Cria as arestas
+
+            //Cria as arestas
             a1 = new Aresta();
             a1->definirAresta(v1, v2);
-            
-			a2 = new Aresta();
+
+            a2 = new Aresta();
             a2->definirAresta(v2, v3);
-            
-			a3 = new Aresta();
+
+            a3 = new Aresta();
             a3->definirAresta(v3, v4);
-            
-			a4 = new Aresta();
+
+            a4 = new Aresta();
             a4->definirAresta(v4, v1);
-            
-			//Cria a celula
+
+            //Cria a celula
             cel = new Celula();
             cel->definirCelula(a1, a2, a3, a4);
-            
-			//Armazena a celula na malha
+
+            //Armazena a celula na malha
             inserirCelula(cel);
         }
     }
     arquivo.close();
 
-	//No linux, ele cria uma celula extra.
+    //No linux, ele cria uma celula extra.
     celulas->pop_back();
 }
 
@@ -98,20 +98,14 @@ void Malha::imprimirMalha()
         cout << "v4 = (" << v4->consultarX() << "," << v4->consultarY() << "," <<
              v4->consultarIntensidade() << "," << v4->consultarId() << ")" << endl;
     }
-
-	/* Faz sentido isso aqui??
-    v->a
-   (*v).a
-	*/
-
 }
 
-void Malha::troca(float *a, float *b)
+void Malha::troca(Vertice **a, Vertice **b)
 {
-	float aux;
-	aux = *a;
-	*a = *b;
-	*b = aux;
+    Vertice *aux;
+    aux = *a;
+    *a = *b;
+    *b = aux;
 }
 
 /* Funcao que determina os pontos que possuem a mesma intensidade
@@ -119,41 +113,107 @@ void Malha::troca(float *a, float *b)
  */
 
 void Malha::curvasDeNivel_forcaBruta(float val)
-{   
-	Celula *c;
+{
+    Celula *c;
     Aresta *arestas;
-    Vertice *v1,*v2,*v3,*v4;
-	float magnMin, magnMax;
+    Vertice *v1,*v2,*v3,*v4,*q,*aux;
+    float magnMin, magnMax;
+    float x,y;
+    int cont = 0;
 
-	//lista que guardara os pontos escolhidos
-	vector<Vertice> isoVertices; //falta de nome melhor..."
+    //lista que guardara os pontos escolhidos
+    vector<Vertice*> *verticesContorno;
 
-	//percorre todas as celulas buscando quais pontos tem mesma intensidade
-	
-	for (int i = 0; i < celulas->size(); i++)
-	{
-		c = celulas->at(i);
-		arestas = c->consultarArestas();
+    //percorre todas as celulas buscando quais pontos tem mesma intensidade
 
+    for (int i = 0; i < celulas->size(); i++)
+    {
+        c = celulas->at(i);
+        arestas = c->consultarArestas();
+
+		cout<<"Entrou nas celula: {" << i << "}\n";
+        
 		for (int j = 0; j < 4; j++)
-		{
-			v1 = arestas[i].consultarVertice1();
-			v2 = arestas[i].consultarVertice2();
+        {
+            v1 = arestas[j].consultarVertice1();
+            v2 = arestas[j].consultarVertice2();
 
-			magnMin = v1->consultarIntensidade();
-			magnMax = v2->consultarIntensidade();
+            if(v1->consultarIntensidade() > v2->consultarIntensidade())
+            {
+			
+//				cout<<"Valor v1: [" << v1->consultarIntensidade() <<"]\n"<<"Valor v2: [" << v2->consultarIntensidade() <<"]\n";
+//				cout << "Teste ponteiros: Antes da Troca: \n" << "v1: "<< v1 << endl << "v2: "<< v2 << endl;
 
-			if (magnMin > magnMax)
-			{
-				troca(&magnMin,&magnMax);
-			}
+				troca(&v1,&v2);
 
-			//... precisa ser implementado... ainda nao entendi direito... :(
-		}	
-	}
-	
+//				cout << "Teste ponteiros: Depois da Troca: \n" << "v1: "<< v1 << endl << "v2: "<< v2 << endl;
 
+            }
+			
+            magnMin = v1->consultarIntensidade();
+            magnMax = v2->consultarIntensidade();
+//			cout << "magnMin:"<< magnMin <<". magnMax:"<< magnMax<<".\n";
+
+            // Faz a interpolacao para o caso do escalar estar entre as magnitudes dos vertices
+            if((val > magnMin && val < magnMax))
+            {
+				cout <<"-----------------------------\n";
+				cout <<"\nValor dentro do intervalo\n";
+
+                if (v2->consultarX() - v1->consultarX() == 0) //Aresta vertical
+                {
+					cout << "\n Entrou no if:Aresta Vertical\n";
+//					cout << "v2x:[" << v2->consultarX() <<"]\n";
+//					cout << "v1x:[" << v1->consultarX() <<"]\n";
+
+					x = v1->consultarX();
+
+					y = ( (val - magnMin) * (v2->consultarY() - v1->consultarY() ) ) /
+                        (magnMax - magnMin) + v1->consultarY();
+
+					cout << "Coord x:(" << x << ")\n";
+					cout << "Coord y:(" << y << ")\n";
+                }
+
+                else //Aresta horizontal
+                {
+
+					cout << "\n Entrou no if:Aresta Horizontal\n";
+
+					x = ((val - magnMin) * (v2->consultarX() - v1->consultarX())) /
+						(magnMax - magnMin) + v1->consultarX();
+					y = v1->consultarY();
+
+					cout << "Coord x:(" << x << ")\n";
+					cout << "Coord y:(" << y << ")\n";
+				}
+					
+				cout << "Coord x:(" << x << ")\n";
+				cout << "Coord y:(" << y << ")\n";
+
+                q = new Vertice();
+                q->definirVertice(x,y,val,cont);
+                cont++;
+//                verticesContorno->push_back(q);
+
+            }/* else if(val == magnMin && val != magnMax)
+				{
+					q = new Vertice();
+					q->definirVertice(v1->consultarX(),v1->consultarY(),val,cont);
+					cont++;
+					verticesContorno->push_back(q);
+
+				} else if(val == magnMax && val != magnMin)
+					{
+						q = new Vertice();
+						q->definirVertice(v2->consultarX(),v2->consultarY(),val,cont);
+						cont++;
+						verticesContorno->push_back(q);
+					}*/
+        }
+    }
 }
+
 Malha::~Malha()
 {
     delete celulas;

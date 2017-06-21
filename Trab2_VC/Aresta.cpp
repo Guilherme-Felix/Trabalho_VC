@@ -16,6 +16,14 @@ Vertice* Aresta::consultarVertice2()
     return vertice2;
 }
 
+Vertice* Aresta::buscarVertice(float magn)
+{
+    if(vertice1->consultarIntensidade() == magn)
+        return vertice1;
+    else if(vertice2->consultarIntensidade() == magn)
+        return vertice2;
+}
+
 void Aresta::definirAresta(Vertice* v1, Vertice* v2)
 {
     vertice1 = v1;

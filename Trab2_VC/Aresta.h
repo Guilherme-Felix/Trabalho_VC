@@ -14,6 +14,7 @@ class Aresta
         Aresta();
         Vertice* consultarVertice1();
         Vertice* consultarVertice2();
+        Vertice* buscarVertice(float magn);
         void definirAresta(Vertice* v1, Vertice* v2);
         ~Aresta();
 };

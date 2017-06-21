@@ -21,11 +21,5 @@ Aresta* Celula::consultarArestas()
 
 Celula::~Celula()
 {
-
-    arestas[0] = NULL;
-    arestas[1] = NULL;
-    arestas[2] = NULL;
-    arestas[3] = NULL;
     delete arestas;
-
 }
