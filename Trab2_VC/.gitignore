@@ -1,2 +1,6 @@
 .gitignore
-*.o
+Vertice.o
+Aresta.o
+Celula.o
+Malha.o
+main.o
